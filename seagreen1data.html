@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sketchfab Viewer API example</title>
+	<link rel="stylesheet" type="text/css" href="style/app.css">
+    <style type="text/css">
+    body {
+        font-family: "Helvetica Neue";
+        font-weight: 200;
+        line-height: 1.5;
+    }
+    .slides {
+        position: absolute;
+        left: 61.8%;
+        top: 0px;
+        width: 38.2%;
+        height: calc(100% - 60px);
+        overflow: auto;
+        background: #ffffff;
+    }
+    .slide {
+        position: absolute;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 30px;
+        opacity: 0;
+        -webkit-transition: opacity .5s;
+        -moz-transition: opacity .5s;
+        transition: opacity .5s;
+
+        text-align: center;
+    }
+    .slide.active {
+        opacity: 1;
+    }
+    </style>
+	
+
+    <!-- Insert this script -->
+    <script type="text/javascript" src="https://static.sketchfab.com/api/sketchfab-viewer-1.9.0.js"></script>
+</head>
+
+<body>
+    <!-- Insert an empty iframe -->
+    <iframe src="" id="api-frame" allow="autoplay; fullscreen; vr" allowvr allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true" width="600" height="500"></iframe><br>
+	<div class="slides">
+		<p><center><b>Survey Imagery</b></center></p>
+		<div id="annotation-0" class="slide.active">
+			<center><p id="imgnum">Image number -</p><center>
+			<img id="myImage" style="width: 100%; height: auto;" src="assets/images/start.jpg" alt="">
+		</div>
+		<p><center><b>Use the buttons below to navigate through the imagery</b></center></p>
+		<center><button id="b0">First Image</button> &nbsp <button id="a0">Previous Image</button> &nbsp <button id="a1">Next Image</button> &nbsp <button id="b1">Last Image</button></center>
+		<center><input type="number" id="jumpto" name="jumpto" min="1" max="1000000"><button id="c0">Jump to Image</button></center>
+		<center><button id="d0">Play Video View</button> &nbsp <button id="d1">stop Video View</button></center>
+	</div>
+
+    <!-- Initialize the viewer -->
+    <script type="text/javascript">
+    var version = '1.9.0';
+var uid = 'd4e0216dd2444777b67a6643d6706b54';
+var iframe = document.getElementById('api-frame');
+var client = new window.Sketchfab(version, iframe);
+
+var error = function () {
+    console.error('Sketchfab API error');
+};
+
+var success = function (api) {
+    api.start(function () {
+        api.addEventListener('viewerready', function () {
+            var numannotations = 0;
+			var annotid = -1;
+			var videostate = 0;
+			api.getAnnotationList(function (p, list) {
+                var l = list.length;
+				numannotations = list.length;
+                var i = l;
+                for (var k = 0; k < l; k++) {
+                    api.hideAnnotation(k);
+					api.hideAnnotationTooltip(k);
+                }
+            });
+            document.getElementById('a0').addEventListener('click', function () {
+                for (var k = 0; k < numannotations; k++) {
+                    api.hideAnnotation(k);
+					api.hideAnnotationTooltip(k);
+                }
+				if(annotid - 1 >= 0){
+					annotid = annotid - 1;
+				}
+				api.gotoAnnotation(annotid, {
+                    preventCameraAnimation: false,
+                    preventCameraMove: false,
+                });
+				api.showAnnotation(annotid);
+				document.getElementById('myImage').src="assets/images/"+String(annotid)+".jpg";
+				document.getElementById("imgnum").innerHTML = "Image number " + String(annotid+1);
+				document.getElementById("jumpto").value = annotid + 1;
+            });
+
+            document.getElementById('a1').addEventListener('click', function () {
+                for (var k = 0; k < numannotations; k++) {
+                    api.hideAnnotation(k);
+					api.hideAnnotationTooltip(k);
+                }
+				if(annotid + 1 < numannotations){
+					annotid = annotid + 1;
+				}
+				api.gotoAnnotation(annotid, {
+                    preventCameraAnimation: false,
+                    preventCameraMove: false,
+                });
+				api.showAnnotation(annotid)
+				document.getElementById('myImage').src="assets/images/"+String(annotid)+".jpg";
+				document.getElementById("imgnum").innerHTML = "Image number " + String(annotid+1);
+				document.getElementById("jumpto").value = annotid + 1;
+            });
+			
+			document.getElementById('b0').addEventListener('click', function () {
+                for (var k = 0; k < numannotations; k++) {
+                    api.hideAnnotation(k);
+					api.hideAnnotationTooltip(k);
+                }
+				annotid = 0;
+				api.gotoAnnotation(annotid, {
+                    preventCameraAnimation: false,
+                    preventCameraMove: false,
+                });
+				api.showAnnotation(annotid);
+				document.getElementById('myImage').src="assets/images/"+String(annotid)+".jpg";
+				document.getElementById("imgnum").innerHTML = "Image number " + String(annotid+1);
+				document.getElementById("jumpto").value = annotid + 1;
+            });
+			
+			document.getElementById('b1').addEventListener('click', function () {
+                for (var k = 0; k < numannotations; k++) {
+                    api.hideAnnotation(k);
+					api.hideAnnotationTooltip(k);
+                }
+				if(numannotations-1>=0){
+					annotid = numannotations-1;
+				} else {
+					annotid = 0;
+				}
+				api.gotoAnnotation(annotid, {
+                    preventCameraAnimation: false,
+                    preventCameraMove: false,
+                });
+				api.showAnnotation(annotid);
+				document.getElementById('myImage').src="assets/images/"+String(annotid)+".jpg";
+				document.getElementById("imgnum").innerHTML = "Image number " + String(annotid+1);
+				document.getElementById("jumpto").value = annotid + 1;
+            });
+			
+			document.getElementById('c0').addEventListener('click', function () {
+                for (var k = 0; k < numannotations; k++) {
+                    api.hideAnnotation(k);
+					api.hideAnnotationTooltip(k);
+                }
+				var jumpnum = document.getElementById("jumpto").value;
+				if (jumpnum>numannotations){
+					annotid = numannotations - 1;
+				} else if (jumpnum - 1 < 0){
+					annotid = 0;
+				}
+				else {
+					annotid = jumpnum - 1;
+				}
+				api.gotoAnnotation(annotid, {
+                    preventCameraAnimation: false,
+                    preventCameraMove: false,
+                });
+				api.showAnnotation(annotid);
+				document.getElementById('myImage').src="assets/images/"+String(annotid)+".jpg";
+				document.getElementById("imgnum").innerHTML = "Image number " + String(annotid+1);
+            });
+			document.getElementById('d0').addEventListener('click', function () {
+				videostate = videostate + 1;
+				if(videostate < 2){
+					videoloop = setInterval(function () {
+						if (annotid + 1 < numannotations){
+							annotid = annotid + 1;
+						} else {
+							annotid = 0;
+						}
+						for (var k = 0; k < numannotations; k++) {
+							api.hideAnnotation(k);
+							api.hideAnnotationTooltip(k);
+						}
+						api.gotoAnnotation(annotid, {
+							preventCameraAnimation: true,
+							preventCameraMove: false,
+						});
+						api.showAnnotation(annotid);
+						document.getElementById('myImage').src="assets/images/"+String(annotid)+".jpg";
+						document.getElementById("imgnum").innerHTML = "Image number " + String(annotid+1);
+						document.getElementById("jumpto").value = annotid + 1;
+					}, 1000);
+				}
+            });
+			document.getElementById('d1').addEventListener('click', function () {
+                clearInterval(videoloop);
+				videostate = 0;
+            });
+        });
+    });
+};
+client.init(uid, {
+    success: success,
+    error: error,
+    autostart: 1,
+    preload: 1,
+});
+</script>
+</body>
+</html>
